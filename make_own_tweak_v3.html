@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Make Own Tweak — Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #C9A84C; --gold-light: #F0D080;
+  --dark: #0D0D0D; --dark2: #181818; --dark3: #222; --dark4: #2a2a2a;
+  --text: #F5F0E8; --muted: #A89F90;
+  --wa: #25D366; --danger: #e74c3c; --success: #2ecc71;
+  --admin: #4A90D9; --warn: #f39c12;
+}
+body {
+  background: radial-gradient(ellipse at 50% 0%, #2a1f05 0%, var(--dark) 55%);
+  color: var(--text); font-family: 'Cairo', sans-serif;
+  min-height: 100vh; padding: 0;
+}
+
+/* PAGES */
+.page { display: none; min-height: 100vh; }
+.page.active { display: flex; flex-direction: column; }
+
+/* LOGIN */
+#loginPage { align-items: center; justify-content: center; padding: 40px 20px; }
+.login-box {
+  background: var(--dark2); border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 24px; padding: 44px 36px;
+  width: 100%; max-width: 420px; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.brand {
+  font-family: 'Montserrat', sans-serif; font-weight: 900;
+  font-size: clamp(24px, 6vw, 40px);
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.brand-line { width: 60px; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 10px auto 16px; }
+.login-sub { font-size: 14px; color: var(--muted); margin-bottom: 30px; }
+.input-wrap { margin-bottom: 14px; }
+.input-wrap input {
+  width: 100%; padding: 14px 18px;
+  background: var(--dark3); border: 1.5px solid rgba(201,168,76,0.2);
+  border-radius: 12px; color: var(--text);
+  font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 600;
+  outline: none; text-align: center; letter-spacing: 2px;
+  transition: border-color 0.2s;
+}
+.input-wrap input:focus { border-color: var(--gold); }
+.input-wrap input.error { border-color: var(--danger); }
+.error-msg { color: var(--danger); font-size: 13px; margin-top: 8px; min-height: 20px; }
+.login-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--gold), #a07830);
+  border: none; border-radius: 12px;
+  color: #0D0D0D; font-family: 'Montserrat', sans-serif;
+  font-weight: 900; font-size: 16px; cursor: pointer;
+  margin-top: 6px; transition: opacity 0.15s, transform 0.15s;
+}
+.login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* USER HEADER */
+header {
+  text-align: center; padding: 36px 24px 22px;
+  border-bottom: 1px solid rgba(201,168,76,0.15); position: relative;
+}
+.logout-btn {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  background: rgba(231,76,60,0.12); border: 1px solid rgba(231,76,60,0.3);
+  color: #e74c3c; border-radius: 10px; padding: 7px 14px;
+  font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.user-badge {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold-light); border-radius: 10px; padding: 7px 12px;
+  font-size: 12px; font-weight: 700; max-width: 130px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.header-sub { font-size: 14px; color: var(--muted); }
+.price-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06));
+  border: 1px solid rgba(201,168,76,0.45);
+  border-radius: 50px; padding: 7px 22px; margin-top: 12px;
+  font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 18px; color: var(--gold-light);
+}
+.price-pill span { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+/* ORDER SECTION */
+.order-section { padding: 24px 16px; max-width: 680px; margin: 0 auto; }
+
+/* MULTI TWEAK SELECTOR */
+.order-box {
+  background: var(--dark2); border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 20px; padding: 24px 20px; margin-bottom: 20px;
+}
+.order-box h2 {
+  font-family: 'Montserrat', sans-serif; font-weight: 900;
+  font-size: 17px; color: var(--gold-light); margin-bottom: 18px; text-align: center;
+}
+.order-label { font-size: 13px; color: var(--muted); margin-bottom: 10px; display: block; }
+
+/* TWEAK CHECKBOXES */
+.tweak-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.tweak-check-item {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--dark3); border: 1.5px solid rgba(201,168,76,0.15);
+  border-radius: 10px; padding: 10px 12px; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s; user-select: none;
+  position: relative;
+}
+.tweak-check-item.selected {
+  border-color: var(--gold); background: rgba(201,168,76,0.08);
+}
+.tweak-check-item.unavailable {
+  opacity: 0.45; cursor: not-allowed;
+}
+.tweak-check-item input[type=checkbox] { display: none; }
+.check-icon {
+  width: 18px; height: 18px; border-radius: 5px;
+  border: 1.5px solid rgba(201,168,76,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; transition: background 0.15s;
+}
+.tweak-check-item.selected .check-icon { background: var(--gold); border-color: var(--gold); color: #0D0D0D; }
+.check-name { font-size: 12px; font-weight: 700; color: var(--text); flex: 1; }
+.unavail-tag {
+  font-size: 10px; color: var(--warn); background: rgba(243,156,18,0.12);
+  border: 1px solid rgba(243,156,18,0.3); border-radius: 5px; padding: 2px 6px;
+  position: absolute; top: 5px; left: 8px;
+}
+
+.others-input {
+  width: 100%; padding: 11px 14px; margin-bottom: 14px;
+  background: var(--dark3); border: 1.5px solid rgba(201,168,76,0.2);
+  border-radius: 12px; color: var(--text);
+  font-family: 'Cairo', sans-serif; font-size: 14px;
+  outline: none; resize: vertical; min-height: 80px;
+  transition: border-color 0.2s;
+}
+.others-input:focus { border-color: var(--gold); }
+
+/* SUMMARY BADGE */
+.order-summary {
+  background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 12px; padding: 12px 16px; margin-bottom: 14px;
+  font-size: 13px; color: var(--gold-light); display: none;
+}
+.order-summary b { color: var(--gold-light); }
+
+/* DELIVERY INFO PANEL */
+.delivery-info-toggle {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--dark3); border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 12px; padding: 11px 16px; margin-bottom: 14px;
+  cursor: pointer; font-size: 13px; color: var(--muted);
+  transition: border-color 0.2s;
+}
+.delivery-info-toggle:hover { border-color: rgba(201,168,76,0.45); }
+.delivery-arrow { margin-right: auto; transition: transform 0.25s; font-size: 11px; }
+.delivery-arrow.open { transform: rotate(180deg); }
+.delivery-panel {
+  background: rgba(201,168,76,0.04); border: 1px solid rgba(201,168,76,0.18);
+  border-radius: 12px; padding: 16px; margin-bottom: 14px; display: none;
+}
+.delivery-panel.open { display: block; }
+.delivery-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(201,168,76,0.1); }
+.delivery-row:last-child { border-bottom: none; }
+.delivery-row .dlbl { font-size: 13px; color: var(--muted); }
+.delivery-row .dval { font-size: 14px; font-weight: 700; color: var(--gold-light); }
+
+.submit-order-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--wa), #128C7E);
+  border: none; border-radius: 12px;
+  color: #fff; font-family: 'Montserrat', sans-serif;
+  font-weight: 900; font-size: 15px; cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.submit-order-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.order-success {
+  display: none; text-align: center; padding: 16px;
+  background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.3);
+  border-radius: 12px; margin-top: 14px;
+  color: var(--success); font-weight: 700; font-size: 14px;
+}
+
+/* FLIP CARDS GRID */
+.grid-section { padding: 0 16px 40px; max-width: 1000px; margin: 0 auto; }
+.section-label {
+  font-size: 11px; color: var(--gold); font-weight: 700;
+  letter-spacing: 3px; text-align: center; margin-bottom: 22px;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+
+/* FLIP CARD */
+.flip-card { height: 190px; cursor: pointer; perspective: 1000px; }
+.flip-inner {
+  position: relative; width: 100%; height: 100%;
+  transition: transform 0.55s cubic-bezier(0.4,0.2,0.2,1);
+  transform-style: preserve-3d;
+}
+.flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back {
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: 18px; padding: 22px 18px;
+  border: 1px solid rgba(201,168,76,0.2);
+  overflow: hidden;
+}
+.flip-front { background: var(--dark2); display: flex; flex-direction: column; justify-content: space-between; }
+.flip-back { background: var(--dark3); transform: rotateY(180deg); display: flex; flex-direction: column; justify-content: center; }
+.flip-card:hover .flip-front { border-color: rgba(201,168,76,0.45); }
+.flip-front::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+.flip-card:hover .flip-front::before { opacity: 1; }
+.card-icon { font-size: 30px; display: block; margin-bottom: 8px; }
+.card-name { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 15px; color: var(--text); direction: ltr; }
+.card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.flip-hint { font-size: 11px; color: rgba(201,168,76,0.5); text-align: left; direction: ltr; }
+.flip-back-title { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 14px; color: var(--gold-light); margin-bottom: 12px; direction: ltr; }
+.flip-benefits { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.flip-benefits li { font-size: 12px; color: var(--text); display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+.flip-benefits li::before { content: '✦'; color: var(--gold); font-size: 10px; margin-top: 2px; flex-shrink: 0; }
+.flip-back-tap { font-size: 11px; color: rgba(201,168,76,0.4); text-align: center; margin-top: 12px; direction: ltr; }
+.unavail-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.55);
+  border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--warn);
+  border: 1px solid rgba(243,156,18,0.3);
+}
+
+/* ADMIN */
+#adminPage { padding: 0 0 60px; }
+.admin-header {
+  background: #0a1628; border-bottom: 2px solid rgba(74,144,217,0.35);
+  padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;
+}
+.admin-title { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 20px; color: var(--admin); }
+.admin-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.admin-logout {
+  background: rgba(231,76,60,0.12); border: 1px solid rgba(231,76,60,0.35);
+  color: #e74c3c; border-radius: 10px; padding: 8px 16px;
+  font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.admin-body { padding: 24px 20px; max-width: 960px; margin: 0 auto; }
+
+/* ADMIN TABS */
+.admin-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+.tab-btn {
+  padding: 9px 20px; border-radius: 10px; font-family: 'Cairo', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid rgba(74,144,217,0.3);
+  background: transparent; color: var(--muted); transition: all 0.15s;
+}
+.tab-btn.active { background: rgba(74,144,217,0.15); color: var(--admin); border-color: rgba(74,144,217,0.6); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* STATS */
+.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--dark2); border: 1px solid rgba(74,144,217,0.2); border-radius: 14px; padding: 16px; text-align: center; }
+.stat-num { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 26px; color: var(--admin); }
+.stat-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ORDERS PANEL */
+.orders-panel { background: var(--dark2); border: 1px solid rgba(74,144,217,0.2); border-radius: 18px; overflow: hidden; }
+.orders-header { padding: 16px 20px; background: rgba(74,144,217,0.07); border-bottom: 1px solid rgba(74,144,217,0.2); display: flex; align-items: center; justify-content: space-between; }
+.orders-title { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 15px; color: var(--admin); }
+.clear-btn { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); color: #e74c3c; border-radius: 8px; padding: 6px 12px; font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+.orders-list { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.no-orders { text-align: center; padding: 36px; color: var(--muted); font-size: 14px; }
+
+.order-item {
+  background: var(--dark3); border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 14px; padding: 14px 16px;
+  animation: slideIn 0.3s ease;
+}
+.order-item.approved { border-color: rgba(46,204,113,0.35); }
+.order-item.rejected { border-color: rgba(231,76,60,0.3); opacity: 0.6; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+.order-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.order-phone { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 15px; color: var(--gold-light); direction: ltr; }
+.order-tweaks { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.tweak-tag { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.25); color: var(--gold-light); font-weight: 700; }
+.order-details-txt { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+.order-time-txt { font-size: 11px; color: var(--muted); margin-top: 5px; }
+.order-delivery-txt { font-size: 11px; color: var(--admin); margin-top: 3px; }
+
+.order-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.status-badge {
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.badge-new { background: rgba(74,144,217,0.15); color: var(--admin); border: 1px solid rgba(74,144,217,0.3); }
+.badge-approved { background: rgba(46,204,113,0.15); color: var(--success); border: 1px solid rgba(46,204,113,0.3); }
+.badge-rejected { background: rgba(231,76,60,0.1); color: #e74c3c; border: 1px solid rgba(231,76,60,0.25); }
+
+.action-btns { display: flex; gap: 5px; }
+.approve-btn { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); color: var(--success); border-radius: 7px; padding: 5px 10px; font-size: 11px; cursor: pointer; font-weight: 700; }
+.reject-btn { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.25); color: #e74c3c; border-radius: 7px; padding: 5px 10px; font-size: 11px; cursor: pointer; font-weight: 700; }
+.delete-btn { background: rgba(100,100,100,0.12); border: 1px solid rgba(100,100,100,0.25); color: var(--muted); border-radius: 7px; padding: 5px 10px; font-size: 11px; cursor: pointer; font-weight: 700; }
+
+/* SETTINGS PANEL */
+.settings-panel { display: flex; flex-direction: column; gap: 16px; }
+.settings-box {
+  background: var(--dark2); border: 1px solid rgba(74,144,217,0.2);
+  border-radius: 18px; padding: 20px;
+}
+.settings-box h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 15px; color: var(--admin); margin-bottom: 16px; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+.setting-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.setting-icon { font-size: 16px; margin-left: 6px; }
+
+/* TOGGLE SWITCH */
+.toggle-wrap { display: flex; align-items: center; gap: 8px; }
+.toggle { position: relative; width: 42px; height: 23px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider-toggle {
+  position: absolute; inset: 0; background: var(--dark4);
+  border-radius: 23px; cursor: pointer; border: 1px solid rgba(201,168,76,0.2);
+  transition: background 0.2s;
+}
+.slider-toggle::before {
+  content: ''; position: absolute; width: 17px; height: 17px;
+  left: 2px; top: 2px; background: var(--muted);
+  border-radius: 50%; transition: transform 0.2s, background 0.2s;
+}
+.toggle input:checked + .slider-toggle { background: rgba(46,204,113,0.25); border-color: var(--success); }
+.toggle input:checked + .slider-toggle::before { transform: translateX(19px); background: var(--success); }
+.toggle-label { font-size: 12px; color: var(--muted); }
+
+/* DELIVERY TIME INPUT */
+.delivery-input-wrap { display: flex; align-items: center; gap: 8px; }
+.delivery-num-input {
+  width: 70px; padding: 7px 10px; text-align: center;
+  background: var(--dark3); border: 1.5px solid rgba(74,144,217,0.3);
+  border-radius: 9px; color: var(--text);
+  font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 15px;
+  outline: none;
+}
+.delivery-unit-select {
+  padding: 7px 10px; background: var(--dark3);
+  border: 1.5px solid rgba(74,144,217,0.3);
+  border-radius: 9px; color: var(--text);
+  font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700;
+  outline: none; cursor: pointer;
+}
+.save-delivery-btn {
+  padding: 7px 14px; background: rgba(74,144,217,0.15);
+  border: 1px solid rgba(74,144,217,0.4); border-radius: 9px;
+  color: var(--admin); font-family: 'Cairo', sans-serif;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.save-delivery-btn:hover { background: rgba(74,144,217,0.25); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="page active" id="loginPage">
+  <div class="login-box">
+    <div class="brand">Make Own Tweak</div>
+    <div class="brand-line"></div>
+    <div class="login-sub">ادخل رقمك عشان تطلب التويك 👇</div>
+    <div class="input-wrap">
+      <input type="text" id="loginInput" placeholder="ادخل رقمك" maxlength="30" autocomplete="off" />
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <button class="login-btn" onclick="handleLogin()">دخول ✦</button>
+  </div>
+</div>
+
+<!-- USER PAGE -->
+<div class="page" id="userPage">
+  <header>
+    <div class="user-badge" id="userBadge">👤</div>
+    <div class="brand">Make Own Tweak</div>
+    <div class="brand-line"></div>
+    <div class="header-sub">اختار التويك اللي تريده 👇</div>
+    <div class="price-pill">45 EGP <span>/ per tweak</span></div>
+    <button class="logout-btn" onclick="logout()">خروج</button>
+  </header>
+
+  <div class="order-section">
+    <!-- ORDER BOX -->
+    <div class="order-box">
+      <h2>✦ اطلب تويكك دلوقتي ✦</h2>
+      <label class="order-label">اختار التويكات اللي عايزها (ممكن تختار أكتر من واحد):</label>
+      <div class="tweak-checks" id="tweakChecks"></div>
+
+      <textarea class="others-input" id="othersInput" placeholder="اكتب اللي عايزه هنا..." style="display:none"></textarea>
+
+      <div class="order-summary" id="orderSummary"></div>
+
+      <!-- DELIVERY INFO TOGGLE -->
+      <div class="delivery-info-toggle" onclick="toggleDeliveryPanel()">
+        <span>📦</span>
+        <span>معلومات التسليم والسعر</span>
+        <span class="delivery-arrow" id="deliveryArrow">▼</span>
+      </div>
+      <div class="delivery-panel" id="deliveryPanel">
+        <div class="delivery-row">
+          <span class="dlbl">🕐 وقت التسليم المتوقع</span>
+          <span class="dval" id="deliveryTimeDisplay">—</span>
+        </div>
+        <div class="delivery-row">
+          <span class="dlbl">💰 السعر الإجمالي</span>
+          <span class="dval" id="deliveryPriceDisplay">0 جنيه</span>
+        </div>
+        <div class="delivery-row">
+          <span class="dlbl">📋 عدد التويكات المختارة</span>
+          <span class="dval" id="deliveryCountDisplay">0 تويك</span>
+        </div>
+      </div>
+
+      <button class="submit-order-btn" onclick="submitOrder()">📲 اطلب دلوقتي</button>
+      <div class="order-success" id="orderSuccess">✅ تم استلام طلبك! هنتواصل معاك قريبًا 🎉</div>
+    </div>
+  </div>
+
+  <!-- FLIP CARDS -->
+  <div class="grid-section">
+    <div class="section-label">✦ OUR TWEAKS — اضغط على الكارت عشان تعرف أكتر ✦</div>
+    <div class="grid" id="tweakGrid"></div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="adminPage">
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">⚙️ Admin Panel</div>
+      <div class="admin-sub">Make Own Tweak — لوحة التحكم</div>
+    </div>
+    <button class="admin-logout" onclick="logout()">تسجيل خروج</button>
+  </div>
+  <div class="admin-body">
+
+    <div class="admin-tabs">
+      <button class="tab-btn active" onclick="switchTab('ordersTab', this)">📋 الطلبات</button>
+      <button class="tab-btn" onclick="switchTab('settingsTab', this)">⚙️ الإعدادات</button>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="tab-panel active" id="ordersTab">
+      <div class="admin-stats">
+        <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">إجمالي الطلبات</div></div>
+        <div class="stat-card"><div class="stat-num" id="statPending">0</div><div class="stat-lbl">قيد المراجعة</div></div>
+        <div class="stat-card"><div class="stat-num" id="statApproved">0</div><div class="stat-lbl">تم الموافقة</div></div>
+        <div class="stat-card"><div class="stat-num" id="statRevenue">0</div><div class="stat-lbl">إيراد (جنيه)</div></div>
+      </div>
+      <div class="orders-panel">
+        <div class="orders-header">
+          <div class="orders-title">📋 الطلبات الواردة</div>
+          <button class="clear-btn" onclick="clearAllOrders()">حذف الكل</button>
+        </div>
+        <div class="orders-list" id="ordersList"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-panel" id="settingsTab">
+      <div class="settings-panel">
+
+        <!-- DELIVERY TIME -->
+        <div class="settings-box">
+          <h3>📦 وقت التسليم</h3>
+          <div class="setting-row">
+            <div>
+              <div class="setting-name">وقت وصول التويك للعميل</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">الوقت اللي بيظهر للعميل في صفحة الطلب</div>
+            </div>
+            <div class="delivery-input-wrap">
+              <input type="number" class="delivery-num-input" id="deliveryNumInput" min="1" max="999" value="24" />
+              <select class="delivery-unit-select" id="deliveryUnitSelect">
+                <option value="ساعة">ساعة</option>
+                <option value="يوم">يوم</option>
+                <option value="دقيقة">دقيقة</option>
+              </select>
+              <button class="save-delivery-btn" onclick="saveDeliveryTime()">حفظ</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TWEAK AVAILABILITY -->
+        <div class="settings-box">
+          <h3>🎮 توافر التويكات</h3>
+          <div id="availabilityToggles"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const TWEAKS_DATA = [
+  { id: 'windows', icon: '🖥️', name: 'Windows Optimization', desc: 'تسريع الويندوز وتحسين الأداء العام للجهاز',
+    benefits: ['تسريع وقت البدء والإغلاق', 'تحسين استخدام الرام', 'إيقاف العمليات الغير ضرورية', 'تحسين إعدادات الشبكة'] },
+  { id: 'fortnite', icon: '🎯', name: 'Fortnite', desc: 'تحسين FPS وتقليل اللاق في فورتنايت',
+    benefits: ['رفع الـ FPS بشكل ملحوظ', 'تقليل الـ input lag', 'تحسين إعدادات الجرافيك للأداء', 'تقليل التقطيع أثناء البيلد'] },
+  { id: 'valorant', icon: '🔫', name: 'Valorant', desc: 'رفع الفريمات وتحسين التصويب في فالورانت',
+    benefits: ['تقليل الـ latency', 'رفع الـ FPS فوق 144+', 'تحسين accuracy والـ recoil', 'تقليل input delay'] },
+  { id: 'roblox', icon: '🧱', name: 'Roblox', desc: 'تحسين أداء روبلوكس وتقليل التقطيع',
+    benefits: ['تقليل الـ lag في الخوادم', 'تحسين FPS', 'تسريع تحميل الخرائط', 'تقليل الـ stuttering'] },
+  { id: 'warzone', icon: '💀', name: 'Warzone', desc: 'تحسين FPS وتقليل اللاق في وارزون',
+    benefits: ['تحسين الأداء في الـ gunfights', 'تقليل الـ packet loss', 'رفع FPS في المناطق الضيقة', 'تحسين visibility'] },
+  { id: 'gtav', icon: '🌆', name: 'GTA V', desc: 'رفع الأداء وتحسين التجربة في GTA V',
+    benefits: ['تحسين FPS في المدينة', 'تقليل crashes', 'تحسين إعدادات الجرافيك', 'تسريع التحميل'] },
+  { id: 'subnautica', icon: '🌊', name: 'Subnautica', desc: 'تقليل التقطيع وتحسين الأداء في سبناوتيكا',
+    benefits: ['تقليل stuttering تحت الماء', 'تحسين FPS', 'تقليل pop-in للأشياء', 'تحسين إعدادات الظلال'] },
+  { id: 'cs', icon: '💣', name: 'Counter Strike', desc: 'رفع FPS وتحسين الاستجابة في CS',
+    benefits: ['رفع FPS فوق 300+', 'تقليل الـ ping', 'تحسين mouse response', 'تحسين network settings'] },
+  { id: 'bloodstrike', icon: '🩸', name: 'Blood Strike', desc: 'تحسين أداء اللعب وتقليل اللاق في بلود سترايك',
+    benefits: ['تقليل اللاق في الـ gunfights', 'رفع FPS', 'تحسين إعدادات الشبكة', 'تحسين الاستجابة'] },
+];
+
+const ADMIN_KEY = 'YASEEN';
+let currentUser = null;
+
+// STORAGE HELPERS
+function getOrders() { try { return JSON.parse(localStorage.getItem('mot_orders') || '[]'); } catch(e) { return []; } }
+function saveOrders(arr) { localStorage.setItem('mot_orders', JSON.stringify(arr)); }
+function getAvailability() { try { return JSON.parse(localStorage.getItem('mot_avail') || '{}'); } catch(e) { return {}; } }
+function saveAvailability(obj) { localStorage.setItem('mot_avail', JSON.stringify(obj)); }
+function getDeliveryTime() { try { return JSON.parse(localStorage.getItem('mot_delivery') || '{"num":24,"unit":"ساعة"}'); } catch(e) { return {num:24,unit:'ساعة'}; } }
+function saveDeliveryTime_() { 
+  const num = parseInt(document.getElementById('deliveryNumInput').value) || 24;
+  const unit = document.getElementById('deliveryUnitSelect').value;
+  localStorage.setItem('mot_delivery', JSON.stringify({num, unit}));
+}
+
+// PAGES
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// LOGIN
+function handleLogin() {
+  const val = document.getElementById('loginInput').value.trim();
+  const errEl = document.getElementById('errorMsg');
+  const inp = document.getElementById('loginInput');
+  inp.classList.remove('error'); errEl.textContent = '';
+  if (!val) { errEl.textContent = 'من فضلك ادخل رقمك'; inp.classList.add('error'); return; }
+  if (val === ADMIN_KEY) { currentUser = 'YASEEN'; openAdmin(); return; }
+  if (/[a-zA-Z]/.test(val)) { errEl.textContent = 'مش مسموح بالحروف — ادخل رقم تليفون صح'; inp.classList.add('error'); return; }
+  if (!/\d/.test(val)) { errEl.textContent = 'ادخل رقم صحيح'; inp.classList.add('error'); return; }
+  currentUser = val;
+  openUser(val);
+}
+
+function openUser(phone) {
+  document.getElementById('userBadge').textContent = '👤 ' + phone;
+  buildCheckboxes();
+  buildFlipGrid();
+  document.getElementById('orderSuccess').style.display = 'none';
+  document.getElementById('othersInput').style.display = 'none';
+  document.getElementById('orderSummary').style.display = 'none';
+  document.getElementById('deliveryPanel').classList.remove('open');
+  document.getElementById('deliveryArrow').classList.remove('open');
+  showPage('userPage');
+}
+
+function openAdmin() {
+  refreshAdminOrders();
+  buildAvailabilityToggles();
+  loadDeliveryTimeSettings();
+  showPage('adminPage');
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('loginInput').value = '';
+  document.getElementById('errorMsg').textContent = '';
+  showPage('loginPage');
+}
+
+// DELIVERY TOGGLE (user side)
+function toggleDeliveryPanel() {
+  const panel = document.getElementById('deliveryPanel');
+  const arrow = document.getElementById('deliveryArrow');
+  panel.classList.toggle('open');
+  arrow.classList.toggle('open');
+  updateDeliveryDisplay();
+}
+
+function updateDeliveryDisplay() {
+  const dt = getDeliveryTime();
+  const selected = getSelectedTweaks();
+  const count = selected.length;
+  const price = count * 45;
+  document.getElementById('deliveryTimeDisplay').textContent = count > 0 ? dt.num + ' ' + dt.unit : '—';
+  document.getElementById('deliveryPriceDisplay').textContent = price + ' جنيه';
+  document.getElementById('deliveryCountDisplay').textContent = count + ' تويك';
+}
+
+// CHECKBOX BUILD
+function buildCheckboxes() {
+  const avail = getAvailability();
+  const container = document.getElementById('tweakChecks');
+  container.innerHTML = '';
+  TWEAKS_DATA.forEach(t => {
+    const isAvail = avail[t.id] !== false;
+    const div = document.createElement('div');
+    div.className = 'tweak-check-item' + (isAvail ? '' : ' unavailable');
+    div.dataset.id = t.id;
+    div.dataset.name = t.name;
+    div.dataset.avail = isAvail ? '1' : '0';
+    div.innerHTML = `
+      ${!isAvail ? '<span class="unavail-tag">غير متاح</span>' : ''}
+      <div class="check-icon">✓</div>
+      <span class="check-name">${t.icon} ${t.name}</span>
+    `;
+    if (isAvail) div.onclick = () => toggleCheck(div);
+    container.appendChild(div);
+  });
+  // Others option
+  const othersDiv = document.createElement('div');
+  othersDiv.className = 'tweak-check-item';
+  othersDiv.dataset.id = 'others';
+  othersDiv.dataset.name = 'Others';
+  othersDiv.dataset.avail = '1';
+  othersDiv.innerHTML = `<div class="check-icon">✓</div><span class="check-name">🔧 Others</span>`;
+  othersDiv.onclick = () => { toggleCheck(othersDiv); toggleOthers(); };
+  container.appendChild(othersDiv);
+}
+
+function toggleCheck(div) {
+  if (div.dataset.avail === '0') return;
+  div.classList.toggle('selected');
+  const icon = div.querySelector('.check-icon');
+  icon.textContent = div.classList.contains('selected') ? '✓' : '';
+  updateSummary();
+}
+
+function toggleOthers() {
+  const othersDiv = document.querySelector('[data-id="others"]');
+  const ta = document.getElementById('othersInput');
+  ta.style.display = othersDiv.classList.contains('selected') ? 'block' : 'none';
+}
+
+function getSelectedTweaks() {
+  return Array.from(document.querySelectorAll('.tweak-check-item.selected'))
+    .map(d => d.dataset.name);
+}
+
+function updateSummary() {
+  const sel = getSelectedTweaks();
+  const summary = document.getElementById('orderSummary');
+  updateDeliveryDisplay();
+  if (!sel.length) { summary.style.display = 'none'; return; }
+  const price = sel.length * 45;
+  summary.style.display = 'block';
+  summary.innerHTML = `✦ اخترت <b>${sel.length} تويك</b> — السعر الإجمالي: <b>${price} جنيه</b>`;
+}
+
+function submitOrder() {
+  const sel = getSelectedTweaks();
+  const others = document.getElementById('othersInput').value.trim();
+  const successEl = document.getElementById('orderSuccess');
+  if (!sel.length) { alert('اختار تويك على الأقل!'); return; }
+  if (sel.includes('Others') && !others) { alert('اكتب اللي عايزه في خانة Others!'); return; }
+  const dt = getDeliveryTime();
+  const order = {
+    id: Date.now(),
+    phone: currentUser,
+    tweaks: sel,
+    details: others,
+    time: new Date().toLocaleString('ar-EG'),
+    timestamp: Date.now(),
+    status: 'new',
+    deliveryTime: dt.num + ' ' + dt.unit
+  };
+  const arr = getOrders();
+  arr.unshift(order);
+  saveOrders(arr);
+  successEl.style.display = 'block';
+  document.querySelectorAll('.tweak-check-item.selected').forEach(d => {
+    d.classList.remove('selected');
+    d.querySelector('.check-icon').textContent = '';
+  });
+  document.getElementById('othersInput').style.display = 'none';
+  document.getElementById('othersInput').value = '';
+  document.getElementById('orderSummary').style.display = 'none';
+  updateDeliveryDisplay();
+  setTimeout(() => { successEl.style.display = 'none'; }, 5000);
+}
+
+// FLIP CARDS
+function buildFlipGrid() {
+  const avail = getAvailability();
+  const grid = document.getElementById('tweakGrid');
+  grid.innerHTML = '';
+  TWEAKS_DATA.forEach(t => {
+    const isAvail = avail[t.id] !== false;
+    const card = document.createElement('div');
+    card.className = 'flip-card';
+    card.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div>
+            <span class="card-icon">${t.icon}</span>
+            <div class="card-name">${t.name}</div>
+            <div class="card-desc">${t.desc}</div>
+          </div>
+          <div class="flip-hint">اضغط لمعرفة التفاصيل →</div>
+          ${!isAvail ? '<div class="unavail-overlay">⚠️ غير متاح حالياً</div>' : ''}
+        </div>
+        <div class="flip-back">
+          <div class="flip-back-title">${t.icon} ${t.name}</div>
+          <ul class="flip-benefits">
+            ${t.benefits.map(b => `<li>${b}</li>`).join('')}
+          </ul>
+          <div class="flip-back-tap">← اضغط للرجوع</div>
+        </div>
+      </div>
+    `;
+    card.onclick = () => card.classList.toggle('flipped');
+    grid.appendChild(card);
+  });
+}
+
+// ADMIN TABS
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ADMIN ORDERS
+function refreshAdminOrders() {
+  const arr = getOrders();
+  const list = document.getElementById('ordersList');
+  const pending = arr.filter(o => o.status === 'new').length;
+  const approved = arr.filter(o => o.status === 'approved').length;
+  document.getElementById('statTotal').textContent = arr.length;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statApproved').textContent = approved;
+  document.getElementById('statRevenue').textContent = approved * 45;
+  if (!arr.length) { list.innerHTML = '<div class="no-orders">لا يوجد طلبات بعد 📭</div>'; return; }
+  list.innerHTML = arr.map(o => {
+    const badgeClass = o.status === 'approved' ? 'badge-approved' : o.status === 'rejected' ? 'badge-rejected' : 'badge-new';
+    const badgeText = o.status === 'approved' ? '✅ تم الموافقة' : o.status === 'rejected' ? '❌ مرفوض' : '🔵 جديد';
+    const itemClass = o.status === 'approved' ? 'order-item approved' : o.status === 'rejected' ? 'order-item rejected' : 'order-item';
+    return `
+      <div class="${itemClass}" id="ord-${o.id}">
+        <div class="order-top">
+          <div class="order-info">
+            <div class="order-phone">${o.phone}</div>
+            <div class="order-tweaks">${(o.tweaks||[o.tweak||'']).map(tw => `<span class="tweak-tag">${tw}</span>`).join('')}</div>
+            ${o.details ? `<div class="order-details-txt">📝 ${o.details}</div>` : ''}
+            <div class="order-time-txt">🕐 ${o.time}</div>
+            <div class="order-delivery-txt">📦 التسليم: ${o.deliveryTime || '—'}</div>
+          </div>
+          <div class="order-actions">
+            <span class="status-badge ${badgeClass}">${badgeText}</span>
+            <div class="action-btns">
+              ${o.status !== 'approved' ? `<button class="approve-btn" onclick="setOrderStatus(${o.id},'approved')">موافقة</button>` : ''}
+              ${o.status !== 'rejected' ? `<button class="reject-btn" onclick="setOrderStatus(${o.id},'rejected')">رفض</button>` : ''}
+              <button class="delete-btn" onclick="deleteOrder(${o.id})">حذف</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setOrderStatus(id, status) {
+  const arr = getOrders().map(o => o.id === id ? {...o, status} : o);
+  saveOrders(arr);
+  refreshAdminOrders();
+}
+
+function deleteOrder(id) {
+  saveOrders(getOrders().filter(o => o.id !== id));
+  refreshAdminOrders();
+}
+
+function clearAllOrders() {
+  if (!confirm('هتحذف كل الطلبات؟')) return;
+  saveOrders([]);
+  refreshAdminOrders();
+}
+
+// AVAILABILITY TOGGLES
+function buildAvailabilityToggles() {
+  const avail = getAvailability();
+  const container = document.getElementById('availabilityToggles');
+  container.innerHTML = TWEAKS_DATA.map(t => {
+    const isOn = avail[t.id] !== false;
+    return `
+      <div class="setting-row">
+        <div class="setting-name"><span class="setting-icon">${t.icon}</span> ${t.name}</div>
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" ${isOn ? 'checked' : ''} onchange="toggleAvailability('${t.id}', this.checked)" />
+            <span class="slider-toggle"></span>
+          </label>
+          <span class="toggle-label">${isOn ? 'متاح' : 'غير متاح'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleAvailability(id, isOn) {
+  const avail = getAvailability();
+  avail[id] = isOn;
+  saveAvailability(avail);
+  buildAvailabilityToggles();
+}
+
+// DELIVERY TIME SETTINGS
+function loadDeliveryTimeSettings() {
+  const dt = getDeliveryTime();
+  document.getElementById('deliveryNumInput').value = dt.num;
+  document.getElementById('deliveryUnitSelect').value = dt.unit;
+}
+
+function saveDeliveryTime() {
+  saveDeliveryTime_();
+  const btn = document.querySelector('.save-delivery-btn');
+  btn.textContent = '✅ تم الحفظ';
+  setTimeout(() => { btn.textContent = 'حفظ'; }, 2000);
+}
+
+// ENTER KEY LOGIN
+document.getElementById('loginInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+</script>
+</body>
+</html>
